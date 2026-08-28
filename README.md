@@ -6,8 +6,3 @@
 - Requests: Managed API calls and authenticated session-based file downloads.
 
 - Unicodedata & Standard Library: Handles file sanitization and cross-platform path management.
-
-##How to use it?
-- extract the osu-gui.zip file
-- locate the "dist" folder
-- run the file.
