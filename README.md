@@ -6,3 +6,6 @@
 - Requests: Managed API calls and authenticated session-based file downloads.
 
 - Unicodedata & Standard Library: Handles file sanitization and cross-platform path management.
+
+Check the reference used for this project
+https://github.com/tomhepz/Osu-Most-Played-Downloader
