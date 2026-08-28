@@ -106,8 +106,16 @@ class OsuDownloaderWorker(QThread):
             os.makedirs(self.save_directory, exist_ok=True)
             self.log_emitted.emit(f"Fetching top {self.limit} most played maps for User ID {self.user_id}...")
 
+            # Set up session with browser-like headers
+            session = requests.Session()
+            session.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Referer": "https://osu.ppy.sh/"
+            })
+            session.cookies.set('osu_session', self.session_cookie, domain='osu.ppy.sh')
+
             url = self.BASE_USER_URL.format(user_id=self.user_id)
-            response = requests.get(url, params={'offset': 0, 'limit': self.limit})
+            response = session.get(url, params={'offset': 0, 'limit': self.limit})
             response.raise_for_status()
             beatmaps = response.json()
 
@@ -116,7 +124,6 @@ class OsuDownloaderWorker(QThread):
                 return
 
             total = len(beatmaps)
-            cookies = {'osu_session': self.session_cookie}
 
             for index, item in enumerate(beatmaps, start=1):
                 beatmapset = item.get('beatmapset', {})
@@ -129,22 +136,23 @@ class OsuDownloaderWorker(QThread):
                 self.log_emitted.emit(f"[{index}/{total}] Downloading: {clean_title}")
 
                 download_url = self.BASE_DOWNLOAD_URL.format(beatmap_id=beatmap_id)
-                dl_response = requests.get(download_url, cookies=cookies)
+                dl_response = session.get(download_url, allow_redirects=True)
                 
-                if dl_response.status_code == 200:
+                # Verify we received binary data rather than an HTML login error page
+                content_type = dl_response.headers.get('Content-Type', '')
+                if dl_response.status_code == 200 and 'text/html' not in content_type:
                     file_path = os.path.join(self.save_directory, f"{clean_title}.osz")
                     with open(file_path, 'wb') as f:
                         f.write(dl_response.content)
                     self.log_emitted.emit(f"Saved: {file_path}")
                 else:
-                    self.log_emitted.emit(f"Failed to download map ID {beatmap_id} (HTTP {dl_response.status_code})")
+                    self.log_emitted.emit(f"Failed map ID {beatmap_id}: Session cookie expired or blocked by Cloudflare (HTTP {dl_response.status_code})")
 
             self.download_finished.emit(True, f"Successfully downloaded maps to '{self.save_directory}'")
 
         except Exception as e:
             self.log_emitted.emit(f"\nError encountered: {str(e)}")
             self.download_finished.emit(False, f"An error occurred:\n{str(e)}")
-
 
 # ==============================================================================
 # 4. MAIN GUI CLASS
