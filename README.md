@@ -1,8 +1,13 @@
 # osu-replay-downloader
-an recreational app that let's you redownload all of your .osz files via Most Played Beatmaps.
+##an recreational app that let's you redownload all of your .osz files via Most Played Beatmaps.
 
-PyQt6: Built a multi-window GUI architecture, complete with background threading (QThread) to prevent interface freezing during active downloads.
+- PyQt6: Built a multi-window GUI architecture, complete with background threading (QThread) to prevent interface freezing during active downloads.
 
-Requests: Managed API calls and authenticated session-based file downloads.
+- Requests: Managed API calls and authenticated session-based file downloads.
 
-Unicodedata & Standard Library: Handles file sanitization and cross-platform path management.
+- Unicodedata & Standard Library: Handles file sanitization and cross-platform path management.
+
+##How to use it?
+- extract the osu-gui.zip file
+- locate the "dist" folder
+- run the file.
